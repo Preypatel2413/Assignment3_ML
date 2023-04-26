@@ -10,8 +10,8 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
 st.title('Boosting in Regression')
-st.write("Over here, we will try to visualise the ")
-
+st.write("Over here, we will try to visualise the effect of number of estimators in the ensembling methods for the regression and could tryout with different basic estimators")
+st.write("Magic button will help you to find the best individual estimator on selected dataset.")
 @st.cache_data
 def make_data(dataset_option):
     opt = dataset_option.split()[0]
