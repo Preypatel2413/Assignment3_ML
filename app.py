@@ -17,15 +17,15 @@ def make_data(dataset_option):
     opt = dataset_option.split()[0]
     if opt == "100":
         X, y = make_regression(n_samples=100,
-                               n_features=2,
+                               n_features=10,n_informative=10,noise=50,
                                random_state=42)
     elif opt == "200":
         X, y = make_regression(n_samples=200,
-                               n_features=2,
+                               n_features=5,n_informative=5,
                                random_state=56)
     elif opt == "150":
         X, y = make_regression(n_samples=150,
-                               n_features=2,
+                               n_features=7,n_informative=2,
                                random_state=25)
     else:
         X, y = make_regression(random_state=10)
@@ -56,7 +56,7 @@ st.pyplot(fig)
 if st.button('Magic'):
     loss = []
     n_splits=5
-    opts = ['Linear regressor', 'Decision Tree regressor', 'SVR']
+    opts = ['LinearRegressor', 'DecisionTreeRegressor', 'SVR']
     for opt in opts:
         kf = KFold(n_splits=n_splits, shuffle=True, random_state=32)
         cv_scores = []
@@ -73,11 +73,12 @@ if st.button('Magic'):
     y_pred = best_model.predict(X_test)
     fig = plt.figure()
     plt.title(f"Best model fit is of {opts[np.argmin(loss)]}")
-    plt.scatter(X_test[:,0], y_pred)
-    plt.scatter(X_test[:,0], y_test)
+    plt.scatter(X_test[:,0], y_pred, label = "Prediction Value")
+    plt.scatter(X_test[:,0], y_test, label = "Real Vaule")
+    plt.legend()
     st.pyplot(fig)
 
-options = ['Linear regressor', 'Decision Tree regressor', 'SVR']
+options = ['LinearRegressor', 'DecisionTreeRegressor', 'SVR']
 model_type = st.selectbox('Select model type to use:', options)
 options = ['boosting', 'bagging', 'gradient descent']
 ensemble_type = st.selectbox('Select the ensemble type:', options)
@@ -89,7 +90,7 @@ if ensemble_type == "bagging":
     test_loss = []
     train_loss = []
     for i in range(1, estimator_number):
-        model = BaggingRegressor(estimator=estimator, n_estimators=i, random_state=45)
+        model = BaggingRegressor(base_estimator=estimator, n_estimators=i, random_state=45)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         temp = mean_squared_error(y_test, y_pred)
@@ -112,7 +113,7 @@ elif ensemble_type == "boosting":
     test_loss = []
     estimator = estimator_model(model_type)
     for i in range(1, estimator_number):
-        model = AdaBoostRegressor(n_estimators=i, estimator=estimator)
+        model = AdaBoostRegressor(n_estimators=i, base_estimator=estimator)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         test_loss.append(mean_squared_error(y_test, y_pred))
@@ -123,4 +124,3 @@ plt.title("loss plot")
 plt.xlabel("n_estimators")
 plt.ylabel("mean squared error loss")
 st.pyplot(fig)
-
