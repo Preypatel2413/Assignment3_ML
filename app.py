@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
 st.title('Boosting in Regression')
+st.write("Over here, we will try to visualise the ")
 
 @st.cache_data
 def make_data(dataset_option):
@@ -51,6 +52,30 @@ plt.ylabel("y")
 plt.title("Dataset")
 plt.scatter(X[:,0], y)
 st.pyplot(fig)
+
+if st.button('Magic'):
+    loss = []
+    n_splits=5
+    opts = ['Linear regressor', 'Decision Tree regressor', 'SVR']
+    for opt in opts:
+        kf = KFold(n_splits=n_splits, shuffle=True, random_state=32)
+        cv_scores = []
+        for train_index, val_index in kf.split(X_train):
+            model = estimator_model(opt)
+            X_train_cv, X_val_cv = X_train[train_index], X_train[val_index]
+            y_train_cv, y_val_cv = y_train[train_index], y_train[val_index]
+            model.fit(X_train_cv, y_train_cv)
+            y_val_pred = model.predict(X_val_cv)
+            cv_scores.append(mean_squared_error(y_val_cv, y_val_pred))
+        loss.append(np.mean(cv_scores))
+    best_model = estimator_model(opts[np.argmin(loss)])
+    best_model.fit(X_train, y_train)
+    y_pred = best_model.predict(X_test)
+    fig = plt.figure()
+    plt.title(f"Best model fit is of {opts[np.argmin(loss)]}")
+    plt.scatter(X_test[:,0], y_pred)
+    plt.scatter(X_test[:,0], y_test)
+    st.pyplot(fig)
 
 options = ['Linear regressor', 'Decision Tree regressor', 'SVR']
 model_type = st.selectbox('Select model type to use:', options)
@@ -99,26 +124,3 @@ plt.xlabel("n_estimators")
 plt.ylabel("mean squared error loss")
 st.pyplot(fig)
 
-if st.button('Magic'):
-    loss = []
-    n_splits=5
-    opts = ['Linear regressor', 'Decision Tree regressor', 'SVR']
-    for opt in opts:
-        kf = KFold(n_splits=n_splits, shuffle=True, random_state=32)
-        cv_scores = []
-        for train_index, val_index in kf.split(X_train):
-            model = estimator_model(opt)
-            X_train_cv, X_val_cv = X_train[train_index], X_train[val_index]
-            y_train_cv, y_val_cv = y_train[train_index], y_train[val_index]
-            model.fit(X_train_cv, y_train_cv)
-            y_val_pred = model.predict(X_val_cv)
-            cv_scores.append(mean_squared_error(y_val_cv, y_val_pred))
-        loss.append(np.mean(cv_scores))
-    best_model = estimator_model(opts[np.argmin(loss)])
-    best_model.fit(X_train, y_train)
-    y_pred = best_model.predict(X_test)
-    fig = plt.figure()
-    plt.title(f"Best model fit is of {opts[np.argmin(loss)]}")
-    plt.scatter(X_test[:,0], y_pred)
-    plt.scatter(X_test[:,0], y_test)
-    st.pyplot(fig)
